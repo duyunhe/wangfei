@@ -12,7 +12,7 @@ import logging
 
 
 sql = "insert into tb_monitor values(%s, %s, %s, 'position')"
-dbConn = mysql_conn.get_bike_connection()
+dbConn = mysql_conn.get_bike_connection_dict()
 cursor = dbConn.cursor()
 comp_num = {'ofo': 0, 'mb': 0, 'hellobike': 0, 'mt': 0, 'xiaoming': 0, 'qibei': 0, 'yonganxing': 0}
 tup_list = []
