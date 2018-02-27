@@ -1,71 +1,18 @@
-# coding=utf-8
-__author__ = 'wf'
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 区域查询:每30分钟查询一次实时表，查询减量车（is_out字段）并统计各个区域减量车数量，写入表tb_area_min,tb_area_mid,tb_area_max的area_out_num字段
+# @File    : tb_area_out_num.py
 import redis
-import MySQLdb
+from DBConn import mysql_conn
 import logging
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
-import re
 from datetime import datetime
 import numpy
 bound = {'ymi': 29.745676, 'yma': 30.56237, 'xmi': 119.436459, 'xma': 120.704416}
 lon = (bound['xma'] - bound['xmi']) / 1000
 lat = (bound['yma'] - bound['ymi']) / 1000
-
-
-def max_min(recds, t):
-    if recds == 1463:
-        x = []
-        for k in range(0, len(t)-1):
-            x.append(t[k][0])
-        xma = max(x)
-        bound = ['xma', xma]
-        print 'xma', xma
-        return bound
-    elif recds == 717:
-        x = []
-        for k in range(0, len(t) - 1):
-            x.append(t[k][0])
-        xmi = min(x)
-        bound = ['xmi',xmi]
-        print 'xmi',xmi
-        return bound
-    elif recds == 679:
-        y = []
-        for k in range(0, len(t) - 1):
-            y.append(t[k][1])
-        ymi = min(y)
-        bound = ['ymi', ymi]
-        print 'ymi', ymi
-        return bound
-    elif recds == 1805:
-        y = []
-        for k in range(0, len(t) - 1):
-            y.append(t[k][1])
-        yma = max(y)
-        bound = ['yma', yma]
-        print 'yma', yma
-        return bound
-
-
-def bound_get():
-    conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
-    cur = conn.cursor()
-    sql = 'select area_id,area_coordinates from tb_area_min'
-    cur.execute(sql)
-    bound = {}
-    for i in cur:
-        id = int(i[0])
-        if id in [1805, 717, 679, 1463]:
-            t = re.findall(r'\d+', i[1])
-            pl = []
-            for a in range(0,len(t),4):
-                x0 = float('{0}.{1}'.format(t[a],t[a+1]))
-                y0 = float('{0}.{1}'.format(t[a+2],t[a+3]))
-                pl.append((x0, y0))
-            bod = max_min(id, pl)
-            bound[bod[0]] = bod[1]
-    return bound
 
 
 def insert_area_out_num_mid(area_out_num, cur, conn):
@@ -107,7 +54,8 @@ def get_data_mid():
     for i in range(1, 25):
         max_num[i] = []
         max_num1[i] = 0
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     sql = 'select * from tb_area_min'
     cur.execute(sql)
@@ -151,7 +99,8 @@ def get_mapindex():
 
 
 def insert_area_num(out_num):
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     insert_sql = 'update tb_area_min set area_out_num = %s where area_id = %s'
     tup_list = []
@@ -170,7 +119,8 @@ def get_result():
     out_num = {}
     for i in range(1, 3288):
         out_num[i] = 0
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     sql = 'select * from tb_bike_status_realtime'
     cur.execute(sql)
@@ -193,9 +143,6 @@ def get_result():
     return out_num
 
 
-map_index = get_mapindex()
-
-
 def main():
     now = datetime.now()
     print 'time is: %s' % now
@@ -207,6 +154,7 @@ def main():
     get_data_mid()
 
 
+map_index = get_mapindex()
 if __name__ == '__main__':
     logging.basicConfig()
     scheduler = BlockingScheduler()

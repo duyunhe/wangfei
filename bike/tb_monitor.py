@@ -1,29 +1,18 @@
-# coding=utf-8
-'''
-共享单车监控：统计每小时每家公司的数据量
-'''
-__author__ = 'wf'
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 共享单车监控：统计每小时每家公司的数据量
+# @File    : tb_monitor.py
 import time
 import stomp
 import json
-import MySQLdb
-from datetime import datetime
-from MySQLdb.cursors import DictCursor
-from DBUtils.PooledDB import PooledDB
+from DBConn import mysql_conn
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 
 
 sql = "insert into tb_monitor values(%s, %s, %s, 'position')"
-# conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
-sql_settings = {'mysql': {'host': '172.18.106.159', 'port': 3306, 'user': 'bike',
-                              'passwd': 'tw_85450077', 'db': 'bike'}}
-pool = PooledDB(creator=MySQLdb,
-                mincached=1, maxcached=20,
-                use_unicode=True, charset='utf8',
-                cursorclass=DictCursor,
-                **sql_settings['mysql'])
-dbConn = pool.connection()
+dbConn = mysql_conn.get_bike_connection()
 cursor = dbConn.cursor()
 comp_num = {'ofo': 0, 'mb': 0, 'hellobike': 0, 'mt': 0, 'xiaoming': 0, 'qibei': 0, 'yonganxing': 0}
 tup_list = []

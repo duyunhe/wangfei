@@ -1,6 +1,8 @@
 # coding=utf-8
 import MySQLdb
 import ConfigParser
+from MySQLdb.cursors import DictCursor
+from DBUtils.PooledDB import PooledDB
 
 
 def get_bike_connection():
@@ -15,6 +17,13 @@ def get_bike_connection():
     pswd = cf.get('db', 'pswd')
     db = cf.get('db', 'db')
     user = cf.get('db', 'user')
-
-    conn = MySQLdb.connect(host=host, user=user, passwd=pswd, db=db, port=port)
-    return conn
+    sql_settings = {'mysql': {'host': host, 'port': port, 'user': user,
+                              'passwd': pswd, 'db': db}}
+    pool = PooledDB(creator=MySQLdb,
+                    mincached=1, maxcached=20,
+                    use_unicode=True, charset='utf8',
+                    cursorclass=DictCursor,
+                    **sql_settings['mysql'])
+    dbConn = pool.connection()
+    # conn = MySQLdb.connect(host=host, user=user, passwd=pswd, db=db, port=port)
+    return dbConn

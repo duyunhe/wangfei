@@ -1,9 +1,9 @@
-# coding=utf-8
-'''
-交通小区每小时统计车辆数量，分公司显示(保留历史记录一天)
-'''
-__author__ = 'cd'
-import MySQLdb
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 交通小区每小时统计车辆数量，分公司显示(保留历史记录一天)
+# @File    : tb_fq_company_history.py
+from DBConn import mysql_conn
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
@@ -34,12 +34,13 @@ def get_mapindex():
 def get_data_all():
     record = []   # 公司名+坐标
     bt = time.time()
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     sql = 'SELECT * from tb_bike_status_realtime where PositionTime > DATE_SUB(Now(),INTERVAL 1 month)'
     cur.execute(sql)
     for i in cur:
-        if i[3] == None or i[4] == None:
+        if i[3] is None or i[4] is None:
             continue
         record.append([i[0], (i[3], i[4])])
     et = time.time()
@@ -49,8 +50,9 @@ def get_data_all():
     return record
 
 
-def insert_OD(company_num):
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+def insert_od(company_num):
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     insert_sql = 'insert into tb_fq_company_history (AreaID, CompanyID, AreaCount, DBTime) values(%s,%s,%s,%s)'
     tup_list = []
@@ -114,7 +116,7 @@ def tick():
     now = datetime.now()
     print 'time is: %s' % now
     comp_num = process_data()
-    insert_OD(comp_num)
+    insert_od(comp_num)
 
 
 def tick1():
@@ -122,7 +124,8 @@ def tick1():
     print 'tick1 is: %s' % now
     yst = now + timedelta(days=-1)
     st = yst.strftime("%Y-%m-%d 00:00:00")
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     sql = 'delete from tb_fq_company_history where DBTime <"{0}"'.format(st)
     cur.execute(sql)

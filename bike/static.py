@@ -1,10 +1,9 @@
-# coding=utf-8
-'''
-周转量(每日订单数量和发生订单的车辆数量)---每天统计一次
-'''
-__author__ = 'wf'
-import MySQLdb
-from DBUtils.PooledDB import PooledDB
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 周转量(每日订单数量和发生订单的车辆数量)---每天统计一次
+# @File    : search_gather.py
+from DBConn import mysql_conn
 import matplotlib.path as mpltPath
 import time
 from datetime import datetime
@@ -38,15 +37,7 @@ def load_area(filename):
 
 
 def write_db():
-    # sql_settings = {'mysql': {'host': '60.191.16.73', 'port': 3306, 'user': 'root',
-    #                           'passwd': 'admin', 'db': 'ptdata'}}
-    sql_settings = {'mysql': {'host': '172.18.106.159', 'port': 3306, 'user': 'bike',
-                              'passwd': 'tw_85450077', 'db': 'bike'}}
-    pool = PooledDB(creator=MySQLdb,
-                    mincached=1, maxcached=20,
-                    use_unicode=True, charset='utf8',
-                    **sql_settings['mysql'])
-    conn = pool.connection()
+    conn = mysql_conn.get_bike_connection()
     cursor = conn.cursor()
 
     sql = "select CompanyID, Longitude, Latitude from tb_bike_status_realtime"
@@ -109,17 +100,8 @@ def main():
 
 
 def check_bike(t1, t2, t):
-    # sql_settings = {'mysql': {'host': '60.191.16.73', 'port': 6052, 'user': 'bike',
-    #                           'passwd': 'bike', 'db': 'bike'}}
-    sql_settings = {'mysql': {'host': '172.18.106.159', 'port': 3306, 'user': 'bike',
-                              'passwd': 'tw_85450077', 'db': 'bike'}}
-    pool = PooledDB(creator=MySQLdb,
-                    mincached=1, maxcached=20,
-                    use_unicode=True, charset='utf8',
-                    **sql_settings['mysql'])
-    conn = pool.connection()
+    conn = mysql_conn.get_bike_connection()
     cursor = conn.cursor()
-
     bike_status = {}
     bike_fact = {}
     for name in company:
@@ -153,16 +135,7 @@ def check_bike(t1, t2, t):
 
 
 def check_orderid(t1, t2, t):
-    # sql_settings = {'mysql': {'host': '60.191.16.73', 'port': 6052, 'user': 'bike',
-    #                           'passwd': 'bike', 'db': 'bike'}}
-    sql_settings = {'mysql': {'host': '172.18.106.159', 'port': 3306, 'user': 'bike',
-                              'passwd': 'tw_85450077', 'db': 'bike'}}
-
-    pool = PooledDB(creator=MySQLdb,
-                    mincached=1, maxcached=20,
-                    use_unicode=True, charset='utf8',
-                    **sql_settings['mysql'])
-    conn = pool.connection()
+    conn = mysql_conn.get_bike_connection()
     cursor = conn.cursor()
     orders = {}
     for name in company:
@@ -179,7 +152,6 @@ def check_orderid(t1, t2, t):
             orders[name].add(orderid)
     et = time.clock()
     print et - bt
-
     for name in company:
         print name, len(orders[name])
     cursor.close()
@@ -189,8 +161,7 @@ def check_orderid(t1, t2, t):
 
 def insert_data(bike_fact, orders, DT):
     st = DT.strftime("%Y-%m-%d")
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
-    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
+    conn = mysql_conn.get_bike_connection()
     cur = conn.cursor()
     sql = 'insert into tb_static(CompanyId,Order_num,Vehicle_num,DBtime) values(%s,%s,%s,%s)'
     tup_list = []

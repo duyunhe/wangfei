@@ -1,9 +1,8 @@
-# coding=utf-8
-'''
-区域查询:每小时查询一次，更新区域当前自行车数量，写入area_num字段
-'''
-__author__ = 'wf'
-import MySQLdb
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 区域查询:每小时查询一次，更新区域当前自行车数量，写入表tb_bike_area的area_num字段
+# @File    : tb_bike_area.py
 from DBConn import mysql_conn
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
@@ -41,7 +40,6 @@ def judge_region(point, path_l):
 
 def get_data():
     conn = mysql_conn.get_bike_connection()
-    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
     cur = conn.cursor()
     path_l = get_xq_index(cur)
     sql = 'SELECT * from tb_bike_status_realtime where PositionTime > DATE_SUB(Now(),INTERVAL 1 day) '
@@ -68,7 +66,6 @@ def get_data():
 
 def insert_bike_area(sta_num):
     conn = mysql_conn.get_bike_connection()
-    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
     cur = conn.cursor()
     insert_sql = 'update tb_bike_area set area_num = %s where area_id = %s '
     tup_list = []

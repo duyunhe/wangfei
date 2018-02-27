@@ -1,14 +1,13 @@
-# coding=utf-8
-'''
-统计小区、中区、大区的区域车辆数　存入area_num字段
-'''
-__author__ = 'wf'
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 统计小区、中区、大区的区域车辆数，存入area_num字段
+# @File    : area_num.py
 import redis
-import MySQLdb
 import logging
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
-import re
+from DBConn import mysql_conn
 from datetime import datetime
 import numpy
 bound = {'ymi': 29.745676, 'yma': 30.56237, 'xmi': 119.436459, 'xma': 120.704416}
@@ -55,8 +54,8 @@ def get_data_mid():
     for i in range(1, 25):
         max_num[i] = []
         max_num1[i] = 0
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
-    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     sql = 'select * from tb_area_min'
     cur.execute(sql)
@@ -85,7 +84,6 @@ def get_mapindex():
     reg = []
     reg1 = []
     pool = redis.ConnectionPool(host='172.18.106.157', port=6068, db=1)
-    # pool = redis.ConnectionPool(host='127.0.0.1', port=6068, db=1)
     r = redis.StrictRedis(connection_pool=pool)
     bt = time.time()
     for t in range(1, 1001):
@@ -101,8 +99,8 @@ def get_mapindex():
 
 
 def insert_area_num(area_num):
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
-    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     insert_sql = 'update tb_area_min set area_num = %s where area_id = %s'
     tup_list = []
@@ -123,7 +121,6 @@ def main():
     area_num = {}
     bt = time.time()
     pool = redis.ConnectionPool(host='172.18.106.157', port=6068, db=0)
-    # pool = redis.ConnectionPool(host='127.0.0.1', port=6068, db=0)
     r = redis.StrictRedis(connection_pool=pool)
     keys = r.keys()
     for i in range(1, 3288):

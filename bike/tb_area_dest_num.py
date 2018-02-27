@@ -1,13 +1,15 @@
-# coding=utf-8
-__author__ = 'wf'
-import MySQLdb
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 统计各区域订单到达的数量（暂未运行）
+# @File    : tb_area_dest_num.py
+from DBConn import mysql_conn
 from datetime import datetime
 from datetime import timedelta
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
 import redis
-import re
 
 
 def get_admin_divi():
@@ -68,7 +70,8 @@ def get_mapindex():
 
 def insert_OD(d_num):
     global xq_district
-    conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052, charset='utf8')
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052, charset='utf8')
     cur = conn.cursor()
     insert_sql = 'insert into tb_area_dest_num (Area_ID, area_district, DestCount, DBtime) values(%s,%s,%s,%s) '
     tup_list = []
@@ -153,7 +156,8 @@ def process(or_dict):  # 规范订单，将其转换为[0,1]模式
 def get_data_all(t1, t2):
     or_dict = {}
     record = []
-    conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
     cur = conn.cursor()
     bt = time.time()
     sql = 'SELECT * from tb_bike_gps_1801 WHERE CompanyId = "mb" and PositionTime>="{0}" and PositionTime< "{1}"'.format(t1, t2)
@@ -206,7 +210,6 @@ def tick():
 
 xq_district = get_admin_divi()
 map_i = get_mapindex()
-tick()
 if __name__ == '__main__':
     logging.basicConfig()
     scheduler = BlockingScheduler()

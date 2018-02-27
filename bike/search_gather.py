@@ -1,13 +1,12 @@
-# coding=utf-8
-'''
-车辆OD统计情况:共享单车第六点---tb_bike_odgraph_statis
-'''
-__author__ = 'wf'
-import MySQLdb
+# -*- coding: utf-8 -*-
+# @Time    : 2018/2/27 8:57
+# @Author  : wf
+# @简介    : 车辆OD图--tb_bike_odgraph和车辆OD统计情况--tb_bike_odgraph_statis
+# @File    : search_gather.py
+from DBConn import mysql_conn
 import numpy as np
 from datetime import datetime
 from datetime import timedelta
-import re
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
@@ -56,8 +55,8 @@ def get_mapindex():
 
 
 def insert_OD(d_ten):
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
-    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     insert_sql = 'insert into tb_bike_odgraph (OrientID, DestID, Count, DBtime) values(%s,%s,%s,%s) '
     tup_list = []
@@ -83,8 +82,8 @@ def insert_OD(d_ten):
 
 
 def insert_bicycle_num(by_dict):
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
-    # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     insert_sql = 'insert into tb_bike_odgraph_statis (OrientID, Number, DBtime) values(%s,%s,%s)'
     tup_list = []
@@ -275,7 +274,8 @@ def process(or_dict):  # 规范订单，将其转换为[0,1]模式
 def get_data_all(t, t1, t2):
     or_dict = {}
     record = []
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
+    # conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
     cur = conn.cursor()
     bt = time.time()
     sql = 'SELECT * from tb_bike_gps_{2} WHERE CompanyId = "mb" and PositionTime>="{0}" and PositionTime< "{1}"'.format(t1, t2, t[2:])
