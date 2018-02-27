@@ -4,6 +4,7 @@
 '''
 __author__ = 'wf'
 import MySQLdb
+from DBConn import mysql_conn
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
 import re
@@ -39,7 +40,7 @@ def judge_region(point, path_l):
 
 
 def get_data():
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
     # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
     cur = conn.cursor()
     path_l = get_xq_index(cur)
@@ -66,7 +67,7 @@ def get_data():
 
 
 def insert_bike_area(sta_num):
-    conn = MySQLdb.connect(host='172.18.106.159', user='bike', passwd='tw_85450077', db='bike', port=3306)
+    conn = mysql_conn.get_bike_connection()
     # conn = MySQLdb.connect(host='60.191.16.73', user='bike', passwd='bike', db='bike', port=6052)
     cur = conn.cursor()
     insert_sql = 'update tb_bike_area set area_num = %s where area_id = %s '
@@ -91,6 +92,7 @@ def tick():
 
 
 if __name__ == '__main__':
+    tick()
     logging.basicConfig()
     scheduler = BlockingScheduler()
     # scheduler.add_job(tick, 'interval', days=1)
