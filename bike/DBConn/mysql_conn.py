@@ -12,13 +12,13 @@ def get_bike_connection_dict():
     fp = open(filename)
     cf.readfp(fp)
 
-    host = cf.get('db', 'host')
-    port = int(cf.get('db', 'port'))
-    pswd = cf.get('db', 'pswd')
-    db = cf.get('db', 'db')
-    user = cf.get('db', 'user')
+    host = cf.get('mysql', 'host')
+    port = int(cf.get('mysql', 'port'))
+    pswd = cf.get('mysql', 'pswd')
+    db = cf.get('mysql', 'mysql')
+    user = cf.get('mysql', 'user')
     sql_settings = {'mysql': {'host': host, 'port': port, 'user': user,
-                              'passwd': pswd, 'db': db}}
+                              'passwd': pswd, 'mysql': db}}
     pool = PooledDB(creator=MySQLdb,
                     mincached=1, maxcached=20,
                     use_unicode=True, charset='utf8',
@@ -35,11 +35,11 @@ def get_bike_connection():
     fp = open(filename)
     cf.readfp(fp)
 
-    host = cf.get('db', 'host')
-    port = int(cf.get('db', 'port'))
-    pswd = cf.get('db', 'pswd')
-    db = cf.get('db', 'db')
-    user = cf.get('db', 'user')
+    host = cf.get('mysql', 'host')
+    port = int(cf.get('mysql', 'port'))
+    pswd = cf.get('mysql', 'pswd')
+    db = cf.get('mysql', 'mysql')
+    user = cf.get('mysql', 'user')
     sql_settings = {'mysql': {'host': host, 'port': port, 'user': user,
                               'passwd': pswd, 'db': db}}
     pool = PooledDB(creator=MySQLdb,
